@@ -47,11 +47,16 @@ public class ClientHandler {
                 while (true) { //цикл общения с сервером (обмен текстовыми сообщениями и командами)
                     String msg = in.readUTF();
                     System.out.print("Сообщение от клиента: " + msg + "\n");
+                    String[] tokens = msg.split(" ", 3);
                     if (msg.startsWith("/")) {
-                        if (msg.equals("/end")) {
+                        if (tokens[0].equals("/end")) {
                             sendMsg("/end_confirm");
                             server.broadcastMsg("Пользователь " + nickname + " отключился.");
                             break;
+                        }
+
+                        if (tokens[0].equals("/w")) {
+                            server.privateMsg(tokens[2], tokens[1], this);
                         }
                     } else {
                         server.broadcastMsg(nickname + ": " + msg);

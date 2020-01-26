@@ -31,25 +31,35 @@ public class Server {
     }
 
     public void broadcastMsg(String msg) {
-        for (ClientHandler o : clients){
+        for (ClientHandler o : clients) {
             o.sendMsg(msg);
         }
     }
 
-    public boolean isNickBusy(String nickname){
-     for (ClientHandler o: clients)  {
-         if (o.getNickname().equals(nickname)){
-             return true;
-         }
-     }
-     return false;
+    public void privateMsg(String msg, String nickname, ClientHandler sender) {
+        for (ClientHandler o : clients) {
+            if (o.getNickname().equals(nickname)) {
+                o.sendMsg("Личное сообщение от " + sender.getNickname() + ": " + msg);
+                return;
+            }
+        }
+        sender.sendMsg("Пользователь " + nickname + " не в сети.");
     }
 
-    public synchronized void subscribe (ClientHandler clientHandler){
+    public boolean isNickBusy(String nickname) {
+        for (ClientHandler o : clients) {
+            if (o.getNickname().equals(nickname)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public synchronized void subscribe(ClientHandler clientHandler) {
         clients.add(clientHandler);
     }
 
-    public synchronized void unsubscribe (ClientHandler clientHandler){
+    public synchronized void unsubscribe(ClientHandler clientHandler) {
         clients.remove(clientHandler);
     }
 }
