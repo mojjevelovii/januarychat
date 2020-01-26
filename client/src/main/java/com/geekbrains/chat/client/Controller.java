@@ -1,9 +1,11 @@
 package com.geekbrains.chat.client;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 
 import java.io.IOException;
 import java.net.URL;
@@ -14,18 +16,48 @@ public class Controller implements Initializable {
     TextArea textArea;
 
     @FXML
-    TextField msgField;
+    TextField msgField, loginField;
+
+    @FXML
+    PasswordField passField;
+
+    @FXML
+    HBox loginBox;
 
     private Network network;
+    private boolean authenticated;
+    private String nickname;
+
+    public void setAuthenticated(boolean authenticated) {
+        this.authenticated = authenticated;
+        loginBox.setVisible(!authenticated);
+        loginBox.setManaged(!authenticated);
+        msgField.setVisible(authenticated);
+        msgField.setManaged(authenticated);
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
+            setAuthenticated(false);
             network = new Network(8189);
             new Thread(() -> {
                 try {
                     while (true) {
                         String msg = network.readMsg();
+                        if (msg.startsWith("/authok ")) { // /authok nick1
+                            nickname = msg.split(" ")[1];
+                            setAuthenticated(true);
+                            break;
+                        }
+                        textArea.appendText(msg + "\n");
+                    }
+                    while (true) {
+                        String msg = network.readMsg();
+                        if (msg.equals("/end_confirm")) {
+                            textArea.appendText("Завершено общение с сервером.");
+                            break;
+                        }
                         textArea.appendText(msg + "\n");
                     }
                 } catch (IOException e) {
@@ -36,6 +68,7 @@ public class Controller implements Initializable {
 
                 } finally {
                     network.close();
+                    Platform.exit();
                 }
             }).start();
 
@@ -54,5 +87,17 @@ public class Controller implements Initializable {
             Alert alert = new Alert(Alert.AlertType.WARNING, "Не удалось отправить сообщение, проверьте сетевое подключение.", ButtonType.OK);
             alert.showAndWait();
         }
+    }
+
+    public void tryToAuth(ActionEvent actionEvent) {
+        try {
+            network.sendMsg("/auth " + loginField.getText() + " " + passField.getText());
+            loginField.clear();
+            passField.clear();
+        } catch (IOException e) {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Не удалось отправить сообщение, проверьте сетевое подключение.", ButtonType.OK);
+            alert.showAndWait();
+        }
+
     }
 }
