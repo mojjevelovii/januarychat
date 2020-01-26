@@ -37,6 +37,7 @@ public class ClientHandler {
                             nickname = nickFromAuthManager;
                             server.subscribe(this);
                             sendMsg("/authok " + nickname);
+                            server.broadcastMsg("Пользователь " + nickname + " подключился.");
                             break;
                         } else {
                             sendMsg("Указан неверный логин/пароль.");
@@ -49,6 +50,7 @@ public class ClientHandler {
                     if (msg.startsWith("/")) {
                         if (msg.equals("/end")) {
                             sendMsg("/end_confirm");
+                            server.broadcastMsg("Пользователь " + nickname + " отключился.");
                             break;
                         }
                     } else {
