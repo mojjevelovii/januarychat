@@ -18,14 +18,8 @@ public class Network {
 
     public void sendMsg(String msg) throws IOException {
         out.writeUTF(msg);
-        handleCommand(msg);
     }
 
-    private void handleCommand(String msg) {
-        if (msg.equals("/end")){
-            close();
-        }
-    }
 
     public String readMsg() throws IOException {
         return in.readUTF();
