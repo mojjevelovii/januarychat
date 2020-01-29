@@ -84,6 +84,12 @@ public class Controller implements Initializable {
                                 textArea.appendText("Завершено общение с сервером.\n");
                                 break;
                             }
+                            if (msg.startsWith("/change_nick_ok ")){
+                                String[] tokens = msg.split(" ");
+                                nickname = tokens [1];
+                                network.sendMsg("/clients_list");
+
+                            }
                             if (msg.startsWith("/clients_list ")) {// /clients_list user1 user2 user3
                                 Platform.runLater(() -> {
                                     clientsList.getItems().clear();

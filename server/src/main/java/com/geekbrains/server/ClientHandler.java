@@ -53,6 +53,14 @@ public class ClientHandler {
                             break;
                         }
 
+                        if (tokens[0].equals("/change_nick")) {
+                            String oldNickname = nickname;
+                            nickname = tokens[1];
+                            sendMsg("/change_nick_ok " + nickname);
+                            server.broadcastClientsList();
+                            server.broadcastMsg("Пользователь " + oldNickname + " изменил имя на " + nickname, false);
+                        }
+
                         if (tokens[0].equals("/w")) { // /w user2 hello, user2
                             server.sendPrivateMsg(this, tokens[1], tokens[2]);
                             continue;
