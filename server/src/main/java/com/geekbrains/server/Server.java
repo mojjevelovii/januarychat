@@ -31,7 +31,10 @@ public class Server {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }finally {
+            authManager.close();
         }
+
     }
 
     public void broadcastMsg(String msg, boolean withDateTime) {

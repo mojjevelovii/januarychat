@@ -1,38 +1,31 @@
 package com.geekbrains.server;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.SQLException;
 
 public class BasicAuthManager implements AuthManager {
-    private class Entry {
-        private String login;
-        private String password;
-        private String nickname;
 
-        public Entry(String login, String password, String nickname) {
-            this.login = login;
-            this.password = password;
-            this.nickname = nickname;
-        }
-    }
-
-    private List<Entry> users;
+    private DBManager dbManager = new DBManager();
 
     public BasicAuthManager() {
-        this.users = new ArrayList<>();
-        users.add(new Entry("login1", "pass1", "user1"));
-        users.add(new Entry("login2", "pass2", "user2"));
-        users.add(new Entry("login3", "pass3", "user3"));
-
+        try {
+            dbManager.connect();
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public String getNicknameByLoginAndPassword(String login, String password) {
-        for (Entry u : users) {
-            if (u.login.equals(login) && u.password.equals(password)) {
-                return u.nickname;
-            }
-        }
-        return null;
+        return dbManager.getNickname(login, password);
+    }
+
+    @Override
+    public void close() {
+        dbManager.disconnect();
+    }
+
+    @Override
+    public void changeNickname(String newNickname, String login) {
+        dbManager.changeNickname(login, newNickname);
     }
 }
