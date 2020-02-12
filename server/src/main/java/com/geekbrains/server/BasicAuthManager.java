@@ -7,7 +7,7 @@ public class BasicAuthManager implements AuthManager {
     private DBManager dbManager = new DBManager();
 
     public BasicAuthManager() throws SQLException, ClassNotFoundException {
-            dbManager.connect();
+        dbManager.connect();
     }
 
     @Override

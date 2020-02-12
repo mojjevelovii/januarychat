@@ -1,5 +1,7 @@
 package com.geekbrains.chat.client;
 
+import com.geekbrains.chat.client.history.FileHistoryHandler;
+import com.geekbrains.chat.client.history.HistoryHandler;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -12,6 +14,7 @@ import javafx.scene.layout.HBox;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 public class Controller implements Initializable {
     @FXML
@@ -32,6 +35,9 @@ public class Controller implements Initializable {
     private Network network;
     private boolean authenticated;
     private String nickname;
+    private String login;
+
+    private HistoryHandler historyHandler;
 
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
@@ -73,6 +79,8 @@ public class Controller implements Initializable {
                             nickname = msg.split(" ")[1];
                             textArea.appendText("Вы зашли в чат под ником: " + nickname + "\n");
                             setAuthenticated(true);
+                            historyHandler = new FileHistoryHandler(login);
+                            historyHandler.getHistory(100).forEach(s -> textArea.appendText(s));
                             break;
                         }
                         textArea.appendText(msg + "\n");
@@ -84,9 +92,9 @@ public class Controller implements Initializable {
                                 textArea.appendText("Завершено общение с сервером.\n");
                                 break;
                             }
-                            if (msg.startsWith("/change_nick_ok ")){
+                            if (msg.startsWith("/change_nick_ok ")) {
                                 String[] tokens = msg.split(" ");
-                                nickname = tokens [1];
+                                nickname = tokens[1];
                                 network.sendMsg("/clients_list");
 
                             }
@@ -103,6 +111,7 @@ public class Controller implements Initializable {
                             }
                         } else {
                             textArea.appendText(msg + "\n");
+                            historyHandler.addRecord(msg);
                         }
                     }
                 } catch (IOException e) {
@@ -139,7 +148,8 @@ public class Controller implements Initializable {
     public void tryToAuth(ActionEvent actionEvent) {
         try {
             tryToConnect();
-            network.sendMsg("/auth " + loginField.getText() + " " + passField.getText());
+            login = loginField.getText();
+            network.sendMsg("/auth " + login + " " + passField.getText());
             loginField.clear();
             passField.clear();
         } catch (IOException e) {
