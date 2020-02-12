@@ -11,6 +11,7 @@ public class ClientHandler {
     private DataInputStream in;
     private DataOutputStream out;
     private String nickname;
+    private String login;
 
     public String getNickname() {
         return nickname;
@@ -29,6 +30,7 @@ public class ClientHandler {
                     if (msg.startsWith("/auth ")) { // /auth login1 pass1
                         String[] tokens = msg.split(" ", 3);
                         String nickFromAuthManager = server.getAuthManager().getNicknameByLoginAndPassword(tokens[1], tokens[2]);
+                        login = tokens[1];
                         if (nickFromAuthManager != null) {
                             if (server.isNickBusy(nickFromAuthManager)) {
                                 sendMsg("Данный пользователь уже в чате.");
@@ -58,6 +60,7 @@ public class ClientHandler {
                             nickname = tokens[1];
                             sendMsg("/change_nick_ok " + nickname);
                             server.broadcastClientsList();
+                            server.getAuthManager().changeNickname(nickname, login);
                             server.broadcastMsg("Пользователь " + oldNickname + " изменил имя на " + nickname, false);
                         }
 

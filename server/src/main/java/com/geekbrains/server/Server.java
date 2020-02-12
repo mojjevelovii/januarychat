@@ -3,6 +3,7 @@ package com.geekbrains.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -20,7 +21,11 @@ public class Server {
 
     public Server(int port) {
         clients = new ArrayList<>();
-        authManager = new BasicAuthManager();
+        try {
+            authManager = new BasicAuthManager();
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             System.out.println("Сервер запущен. Ожидаем подключения клиентов...");
             while (true) {
@@ -31,7 +36,10 @@ public class Server {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }finally {
+            authManager.close();
         }
+
     }
 
     public void broadcastMsg(String msg, boolean withDateTime) {
