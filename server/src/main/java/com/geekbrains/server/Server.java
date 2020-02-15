@@ -36,7 +36,7 @@ public class Server {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             authManager.close();
         }
 
