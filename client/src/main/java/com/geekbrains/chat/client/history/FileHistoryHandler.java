@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FileHistoryHandler implements HistoryHandler {
     private File historyFile;
@@ -24,15 +25,10 @@ public class FileHistoryHandler implements HistoryHandler {
     @Override
     public List<String> getHistory(int historySize) {
         List<String> list = new ArrayList<>();
-        try (InputStreamReader fileReader = new InputStreamReader(new FileInputStream(historyFile), StandardCharsets.UTF_8)) {
-            int x;
-            StringBuilder sb = new StringBuilder();
-            while ((x = fileReader.read()) != -1) {
-                sb.append((char) x);
-                if (x == '\n') {
-                    list.add(sb.toString());
-                    sb.delete(0, sb.length());
-                }
+        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(new FileInputStream(historyFile)))) {
+            String x;
+            while ((x = fileReader.readLine()) != null) {
+                list.add(x+"\n");
             }
         } catch (IOException e) {
             e.printStackTrace();
