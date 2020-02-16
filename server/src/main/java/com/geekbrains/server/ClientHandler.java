@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
 
 public class ClientHandler {
     private Server server;
@@ -17,12 +18,13 @@ public class ClientHandler {
         return nickname;
     }
 
-    public ClientHandler(Server server, Socket socket) throws IOException {
+    public ClientHandler(Server server, Socket socket, ExecutorService service) throws IOException {
         this.server = server;
         this.socket = socket;
         this.in = new DataInputStream(socket.getInputStream());
         this.out = new DataOutputStream(socket.getOutputStream());
-        new Thread(() -> {
+
+        service.execute(() -> {
             try {
                 while (true) { //цикл аутентификации
                     String msg = in.readUTF();
@@ -78,7 +80,7 @@ public class ClientHandler {
             } finally {
                 close();
             }
-        }).start();
+        });
     }
 
     public void sendMsg(String msg) {
