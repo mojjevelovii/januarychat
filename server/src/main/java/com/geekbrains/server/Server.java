@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
     private AuthManager authManager;
@@ -20,6 +22,18 @@ public class Server {
     }
 
     public Server(int port) {
+
+        /*
+        На мой взгляд, если использовать ExecutorService,
+        то лучше всего использовать newCachedThreadPool т. к.
+        мы не можем заранее предсказать количество пользователей в чате онлайн.
+        Поэтому ограничивать их количество newFixedThreadPool'ом нелогично.
+        Кроме того, newFixedThreadPool неоптимален по стратегии
+        использования ресурсов для нашего сетевого чата.
+        */
+
+        ExecutorService service = Executors.newCachedThreadPool();
+
         clients = new ArrayList<>();
         try {
             authManager = new BasicAuthManager();
@@ -31,7 +45,8 @@ public class Server {
             while (true) {
                 Socket socket = serverSocket.accept();
                 System.out.println("Клиент подключился.");
-                new ClientHandler(this, socket);
+
+                new ClientHandler(this, socket, service);
 
             }
         } catch (IOException e) {
