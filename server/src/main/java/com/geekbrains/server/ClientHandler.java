@@ -1,11 +1,15 @@
 package com.geekbrains.server;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
 public class ClientHandler {
+    private static final Logger LOGGER = LogManager.getLogger(ClientHandler.class);
     private Server server;
     private Socket socket;
     private DataInputStream in;
@@ -26,13 +30,14 @@ public class ClientHandler {
             try {
                 while (true) { //цикл аутентификации
                     String msg = in.readUTF();
-                    System.out.print("Сообщение от клиента: " + msg + "\n");
+                    LOGGER.info("Сообщение от клиента: " + msg + "\n");
                     if (msg.startsWith("/auth ")) { // /auth login1 pass1
                         String[] tokens = msg.split(" ", 3);
                         String nickFromAuthManager = server.getAuthManager().getNicknameByLoginAndPassword(tokens[1], tokens[2]);
                         login = tokens[1];
                         if (nickFromAuthManager != null) {
                             if (server.isNickBusy(nickFromAuthManager)) {
+                                LOGGER.info("Данный пользователь уже в чате.");
                                 sendMsg("Данный пользователь уже в чате.");
                                 continue;
                             }
@@ -41,13 +46,14 @@ public class ClientHandler {
                             server.subscribe(this);
                             break;
                         } else {
+                            LOGGER.info("Указан неверный логин/пароль.");
                             sendMsg("Указан неверный логин/пароль.");
                         }
                     }
                 }
                 while (true) { //цикл общения с сервером (обмен текстовыми сообщениями и командами)
                     String msg = in.readUTF();
-                    System.out.print("Сообщение от клиента: " + msg + "\n");
+                    LOGGER.info("Сообщение от клиента " + login + " : " + msg + "\n");
                     String[] tokens = msg.split(" ", 3);
                     if (msg.startsWith("/")) {
                         if (tokens[0].equals("/end")) {

@@ -1,5 +1,9 @@
 package com.geekbrains.server;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Server {
+
+    private static final Logger LOGGER = LogManager.getLogger(Server.class);
     private AuthManager authManager;
     private List<ClientHandler> clients;
 
@@ -20,21 +26,24 @@ public class Server {
     }
 
     public Server(int port) {
+
         clients = new ArrayList<>();
         try {
             authManager = new BasicAuthManager();
         } catch (SQLException | ClassNotFoundException e) {
+            LOGGER.throwing(Level.ERROR, e);
             throw new RuntimeException(e);
         }
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("Сервер запущен. Ожидаем подключения клиентов...");
+            LOGGER.info("Сервер запущен. Ожидаем подключения клиентов...");
             while (true) {
                 Socket socket = serverSocket.accept();
-                System.out.println("Клиент подключился.");
+                LOGGER.info("Клиент подключился.");
                 new ClientHandler(this, socket);
 
             }
         } catch (IOException e) {
+            LOGGER.throwing(Level.ERROR, e);
             e.printStackTrace();
         } finally {
             authManager.close();
